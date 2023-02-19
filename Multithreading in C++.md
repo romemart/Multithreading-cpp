@@ -5,9 +5,9 @@ Some programs require more than one input simultaneously. Such a program needs t
 
 Since threads have similarities to processes, a program of threads is compiled by the g++ compiler as follows:
 ```cpp
-g++ -std=c++17 temp.cc -lpthread -o temp
+g++ -std=c++17 main.cpp -lpthread -o main
 ```
-Where temp.cc is the source code file, and the temp is the executable file.
+Where main.cpp is the source code file, and the <font color="red">main</font> is the executable file and compiled under standard <span style="color:green;font-size:12px">(C++17)</span>.
 
 A program that uses threads, is begun as follows:
 ```cpp
@@ -15,7 +15,7 @@ A program that uses threads, is begun as follows:
 #include <thread>
 using namespace std;
 ```
-Note the use of `#include <thread>`.
+Note the use of <font color="red">#include \<thread></font>.
 
 This article explains Multi-thread and Data Race Basics in C++. The reader should have basic knowledge of C++, it’s Object-Oriented Programming, and its lambda function; to appreciate the rest of this article.
 
@@ -69,12 +69,18 @@ The name of the thread is thr, instantiated from the thread class, thread. Remem
 
 The constructor function of the thread class takes a reference to the function as an argument.
 
-This program now has two threads: the main thread and the thr object thread. The output of this program should be `seen` from the thread function. This program as it is has no syntax error; it is well-typed. This program, as it is, compiles successfully. However, if this program is run, the thread (function, thrdFn) may not display any output; an error message might be displayed. This is because the thread, thrdFn() and the main() thread, have not been made to work together. In C++, all threads should be made to work together, using the join() method of the thread – see below.
+This program now has two threads: the main thread and the thr object thread. The output of this program should be: <font color="red">seen</font> (printing from the thread function). This program as it is has no syntax error; it is well-typed. This program, as it is, compiles successfully. However, if this program is run, the thread (function, thrdFn) may not display any output; an error message might be displayed. This is because the thread, <font color="red">thrdFn()</font> and the <font color="red">main()</font> thread, have not been made to work together. In C++, all threads should be made to work together, using the <font color="red">join()</font> method of the thread – see below.
 
 <div id='2'/>
 
 #### Thread Object Members
-The important members of the thread class are the `join()`, `detach()` and `id get_id()` functions;
+The most important members functions of the thread class are:
+| Members                       | Description                       |
+| -----------                 | -----------                       |
+|join|Waits for the thread to finish its execution <span style="color:green;font-size:12px">(public member function)</span>|
+|detach|Permits the thread to execute independently from the thread handle <span style="color:green;font-size:12px">(public member function)</span>|
+|get_id|Returns the id of the thread <span style="color:green;font-size:12px">(public member function)</span>|
+|joinable|Checks whether the thread is joinable, i.e. potentially running in parallel context <span style="color:green;font-size:12px">(public member function)</span>|
 
 ##### void join()
 If the above program did not produce any output, the two threads were not forced to work together. In the following program, an output is produced because the two threads have been forced to work together:
@@ -85,16 +91,18 @@ using namespace std;
 
 void thrdFn() {
         cout << "seen" << '\n';
-    }  
+}  
 
 int main(int argc, char const *argv[])
 {
     thread thr(&thrdFn);
 
+    thr.join();
+
     return 0;
 }
 ```
-Now, there is an output, `seen` without any run-time error message. As soon as a thread object is created, with the encapsulation of the function, the thread starts running; i.e., the function starts executing. The join() statement of the new thread object in the main() thread tells the main thread (main() function) to wait until the new thread (function) has completed its execution (running). The main thread will halt and will not execute its statements below the join() statement until the second thread has finished running. The result of the second thread is correct after the second thread has completed its execution.
+Now, there is an output, <font color="red">seen</font> (without any run-time error message). As soon as a thread object is created, with the encapsulation of the function, the thread starts running; i.e., the function starts executing. The join() statement of the new thread object in the main() thread tells the main thread (main() function) to wait until the new thread (function) has completed its execution (running). The main thread will halt and will not execute its statements below the join() statement until the second thread has finished running. The result of the second thread is correct after the second thread has completed its execution.
 
 If a thread is not joined, it continues to run independently and may even end after the main() thread has ended. In that case, the thread is not really of any use.
 
@@ -150,7 +158,7 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-Note the statement, `thr.detach();`. This program, as it is, will compile very well. However, when running the program, an error message may be issued. When the thread is detached, it is on its own and may complete its execution after the calling thread has completed its execution.
+Note the statement, <font color="red">thr.detach();</font>. This program, as it is, will compile very well. However, when running the program, an error message may be issued. When the thread is detached, it is on its own and may complete its execution after the calling thread has completed its execution.
 ##### id get_id()
 id is a class in the thread class. The member function, get_id(), returns an object, which is the ID object of the executing thread. The text for the ID can still be gotten from the id object – see later. The following code shows how to obtain the id object of the executing thread:
 ```cpp
@@ -178,7 +186,7 @@ Thread:1 ID: 40744
 <div id='3'/>
 
 #### Thread Returning a Value
-The effective thread is a function. A function can return a value. So a thread should be able to return a value. However, as a rule, the thread in C++ does not return a value. This can be worked around using the C++ class, Future in the standard library, and the C++ async() function in the Future library. A top-level function for the thread is still used but without the direct thread object. The following code illustrates this:
+The effective thread is a function. A function can return a value. So a thread should be able to return a value. However, as a rule, the thread in C++ does not return a value. This can be worked around using the C++ class, <font color="red">\<future></font> in the standard library, and the C++ <font color="red">std::async()</font> function in the Future library. A top-level function for the thread is still used but without the direct thread object. The following code illustrates this:
 ```cpp
 #include <iostream>
 #include <thread>
@@ -328,13 +336,52 @@ A code segment (critical section) of a thread of execution can be locked just be
 <div id='9'/>
 
 #### Mutex Library
-Mutex stands for Mutual Exclusion. A mutex is an instantiated object that enables the programmer to lock and unlock a critical code section of a thread. There is a mutex library in the C++ standard library. It has the classes: mutex and timed_mutex – see details below.
 
-A mutex owns its lock.
+Defined as <font color="red">\<mutex></font> library owns mutual exclusion algorithms prevent multiple threads from simultaneously accessing shared resources. This prevents data races and provides support for synchronization between threads.
+
+| Types                       | Description                       |
+| -----------                 | -----------                       |
+|mutex <span style="color:green;font-size:12px">(C++11)</span>                |Provides basic mutual exclusion facility <span style="color:green;font-size:12px">(class)</span>|
+|shared_mutex <span style="color:green;font-size:12px">(C++17)</span>         |Provides shared mutual exclusion facility <span style="color:green;font-size:12px">(class)</span>|
+|timed_mutex <span style="color:green;font-size:12px">(C++11)</span>          |Provides mutual exclusion facility which implements locking with a timeout <span style="color:green;font-size:12px">(class)</span>|
+|shared_timed_mutex <span style="color:green;font-size:12px">(C++14)</span>   |Provides shared mutual exclusion facility and implements locking with a timeout <span style="color:green;font-size:12px">(class)</span>|
+|recursive_mutex <span style="color:green;font-size:12px">(C++11)</span>      |Provides mutual exclusion facility which can be locked recursively by the same thread <span style="color:green;font-size:12px">(class)</span>|
+|recursive_timed_mutex <span style="color:green;font-size:12px">(C++11)|Provides mutual exclusion facility which can be locked recursively by the same thread and implements locking with a timeout <span style="color:green;font-size:12px">(class)</span>|
+
+Generic mutex management.
+
+|Locks                                                         | Description                     |
+| --------                                                         | -----------                     |
+|lock_guard <span style="color:green;font-size:12px">(C++11)</span>|Implements a strictly scope-based mutex ownership wrapper <span style="color:green;font-size:12px">(class template)</span>|
+|unique_lock <span style="color:green;font-size:12px">(C++11)</span>|Implements movable mutex ownership wrapper <span style="color:green;font-size:12px">(class template)</span>|
+|shared_lock <span style="color:green;font-size:12px">(C++11)</span>|Implements movable shared mutex ownership wrapper <span style="color:green;font-size:12px">(class template)</span>|
+|scoped_lock <span style="color:green;font-size:12px">(C++17)</span>|Deadlock-avoiding RAII wrapper for multiple mutexes <span style="color:green;font-size:12px">(class template)</span> |
+
+Tag constants used to specify locking strategy.
+
+|Tag arguments                                                     | Description                     |
+| --------                                                         | -----------                     |
+|defer_lock <span style="color:green;font-size:12px">(C++11)</span>|Do not acquire ownership of the mutex <span style="color:green;font-size:12px">defer_lock_t</span>|
+|try_to_lock <span style="color:green;font-size:12px">(C++11)</span>|Try to acquire ownership of the mutex without blocking <span style="color:green;font-size:12px">try_to_lock_t</span>|
+|adopt_lock <span style="color:green;font-size:12px">(C++11)</span>|Assume the calling thread already has ownership of the mutex <span style="color:green;font-size:12px">adopt_lock_t</span>|
+
+Generic locking algorithms for multiple mutexes.
+
+|Functions   | Description                     |
+| --------   |  --------                       |
+|try_lock <span style="color:green;font-size:12px">(C++11)</span>|Attempts to obtain ownership of mutexes via repeated calls to try_lock <span style="color:green;font-size:12px">(function template)</span>|
+|lock <span style="color:green;font-size:12px">(C++11)</span>|Locks specified mutexes, blocks if any are unavailable <span style="color:green;font-size:12px">(function template)</span>|
+
+Call once.
+|Functions   | Description                     |
+| --------   |  --------                       |
+|once_flag <span style="color:green;font-size:12px">(C++11)</span>|Helper object to ensure that call_once invokes the function only once <span style="color:green;font-size:12px">(class)</span>|
+|lock <span style="color:green;font-size:12px">(C++11)</span>|Invokes a function only once even if called from multiple threads <span style="color:green;font-size:12px">(function template)</span>|
+
 <div id='10'/>
 
 #### Timeout in C++
-An action can be made to occur after a duration or at a particular point in time. To achieve this, `Chrono` has to be included, with the directive, `#include <chrono>`.
+An action can be made to occur after a duration or at a particular point in time. To achieve this, `Chrono` has to be included, with the directive, <font color="red">#include \<chrono></font>.
 
 ##### duration
 duration is the class-name for duration, in the namespace chrono, which is in namespace std. Duration objects can be created as follows:
@@ -358,8 +405,43 @@ Here, tp is an instantiated object.
 <div id='11'/>
 
 #### Lockable Requirements
-Let `m` be the instantiated object of the class, mutex.
-##### BasicLockable Requirements
+
+| Types                       | Description                       |
+| -----------                 | -----------                       |
+|std::mutex <span style="color:green;font-size:12px">(C++11)</span>                |Provides basic mutual exclusion facility <span style="color:green;font-size:12px">(class)</span>|
+|std::timed_mutex <span style="color:green;font-size:12px">(C++11)</span>          |Provides mutual exclusion facility which implements locking with a timeout <span style="color:green;font-size:12px">(class)</span>|
+
+##### BasicLockable Requirements (std::mutex)
+Represented as <font color="red">std::mutex</font> defined as class in header <font color="red">\<mutex></font> (since C++11)
+To see this topic, we will start from an instantiated object of the mutex class.
+```cpp
+std::mutex m;
+```
+The class mutex has the following member functions:
+| Members                       | Description                       |
+| -----------                 | -----------                       |
+|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
+|lock     |Locks the mutex, blocks if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>         |
+|unlock   |Unlock multiple mutexes <span style="color:green;font-size:12px">(public member function)</span>                                       |
+
+Do not confuse public member function of <font color="red">mutex class</font> with functions of the <font color="red">\<mutex></font> library. 
+
+Member functions of mutex class:
+```cpp
+std::mutex m;
+
+m.lock();
+m.unlock();
+m.try_lock();
+```
+Functions of the \<mutex> library are used for multiple mutexes:
+
+```cpp
+std::mutex m1,m2,m3 ...;
+
+std::lock(m1, m2, m3 ...);
+std::try_lock(m1, m2, m3 ...)
+```
 ##### m.lock()
 Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
 If lock is called by a thread that already owns the mutex, the behavior is undefined: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
@@ -397,58 +479,65 @@ cout << globl << endl;
 ```
 Which must not necessarily be indented, is the only code that has access to the memory location (resource), identified by globl, and the computer screen (resource) represented by cout, at the time of execution.
 ##### m.try_lock()
-This is the same as m.lock() but does not block the current execution agent. It goes straight ahead and attempts a lock. If it cannot lock, probably because another thread has already locked the resources, it throws an exception.
-
-In case the function is successful locking all objects, it returns -1.
-Otherwise, the function returns the index of the object which failed to be locked (0 for a, 1 for b,...).
-`m.try_lock()` must be unlocked with `m.unlock()`, after the appropriate code segment. Example:
+This is the same as m.lock() but does not block the current execution agent. Returns immediately. On successful lock acquisition returns true, otherwise returns false.
+This function is allowed to fail spuriously and return false even if the mutex is not currently locked by any other thread.
+If try_lock is called by a thread that already owns the mutex, the behavior is undefined.
+Example:
 ```cpp
-#include <iostream>       // std::cout
-#include <thread>         // std::thread
-#include <mutex>          // std::mutex, std::try_lock
+#include <iostream>     //std::cout std::endl;
+#include <thread>       //std::thread
+#include <mutex>        //std::mutex
 
-std::mutex foo,bar;
+std::mutex m;
 
-void task_a () {
-  foo.lock();
-  std::cout << "task a\n";
-  bar.lock();
-  // ...
-  foo.unlock();
-  bar.unlock();
-}
-
-void task_b () {
-  int x = try_lock(bar,foo);
-  if (x==-1) {
-    std::cout << "task b\n";
-    // ...
-    bar.unlock();
-    foo.unlock();
-  }
-  else {
-    std::cout << "[task b failed: mutex " << (x?"foo":"bar") << " locked]\n";
-  }
-}
+void thrdFn(const std::string& str) {
+    if (m.try_lock()){
+        std::cout << str << " locked the mutex" << "\n";
+        m.unlock();
+    }
+    else{
+        std::cout << str << " failed to lock the mutex" << "\n";
+    }
+}  
 
 int main(int argc, char const *argv[])
 {
-  std::thread th1 (task_a);
-  std::thread th2 (task_b);
+    std::thread t1(thrdFn,"t1");
+    std::thread t2(thrdFn,"t2");
 
-  th1.join();
-  th2.join();
+    t1.join();
+    t2.join();
 
-  return 0;
+    return 0;
 }
 ```
 The output is:
 ```cpp
-task a
-[task b failed: mutex foo locked]
+t1 locked the mutex
+t2 failed to lock the mutex
 ```
-##### TimedLockable Requirements
-There are two time lockable functions defined in header <font color="red">\<mutex></font>: `std::timed_mutex::try_lock_for` and `std::timed_mutex::try_lock_until` will be explained bellow.
+##### TimedLockable Requirements (std::timed_mutex)
+
+Represented as <font color="red">std::timed_mutex</font> defined as class in header <font color="red">\<mutex></font> (since C++11)
+The class timed_mutex has the following member functions:
+| Members                       | Description                       |
+| -----------                 | -----------                       |
+|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
+|lock     |Locks the mutex, blocks if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>         |
+|try_lock_for|Tries to lock the mutex, returns if the mutex has been unavailable for the specified relative time duration <span style="color:green;font-size:12px">(public member function)</span>         |
+|try_lock_until|Tries to lock the mutex, returns if the mutex has been unavailable for the specified absolute time point has been reached <span style="color:green;font-size:12px">(public member function)</span>         |
+|unlock   |Unlock multiple mutexes <span style="color:green;font-size:12px">(public member function)</span>    
+
+Member functions in timed_mutex class:
+```cpp
+std::timed_mutex m;
+
+m.lock();
+m.unlock();
+m.try_lock();
+m.try_lock_for(rel_time);
+m.try_lock_until(abs_time);
+```
 
 ##### m.try_lock_for(rel_time)
 Attempts to lock the `std::timed_mutex` object, blocking for rel_time at most or by timed_mutex object unlock() member: 
@@ -463,17 +552,17 @@ Taking as parameter rel_time:The maximum time span during which the thread will 
 #include <thread>         // std::thread
 #include <mutex>          // std::timed_mutex
 
-std::timed_mutex mtx;
+std::timed_mutex m;
 
 void thrdFn(int i){
     // waiting to get a lock: each thread prints "-" every 200ms:
-    while (!mtx.try_lock_for(std::chrono::milliseconds(200))) {
+    while (!m.try_lock_for(std::chrono::milliseconds(200))) {
         std::cout << "-";
     }
     // got a lock! - wait for 1s, then this thread prints its own index
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << i << "\n";
-    mtx.unlock();
+    m.unlock();
 }
 
 int main(int argc, char const *argv[])
@@ -514,18 +603,18 @@ Taking as parameter abs_time: A point in time at which the thread will stop bloc
 #include <thread>         // std::thread
 #include <mutex>          // std::timed_mutex
 
-std::timed_mutex mtx;
+std::timed_mutex m;
 
 void thrdFn(int i){
     // waiting to get a lock: each thread prints "-" every 200ms:
     auto now = std::chrono::steady_clock::now();
-    while (!mtx.try_lock_until(now + std::chrono::milliseconds(200))) {
+    while (!m.try_lock_until(now + std::chrono::milliseconds(200))) {
         std::cout << "-";
     }
     // got a lock! - wait for 1s, then this thread prints its own index
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << i << "\n";
-    mtx.unlock();
+    m.unlock();
 }
 
 int main(int argc, char const *argv[])
@@ -558,7 +647,7 @@ Note that the argument for m.try_lock_for() is duration and the argument for m.t
 
 #### Mutex Types
 
-Defined in header <font color="red">\<mutex></font>
+Defined in header <font color="red">\<mutex></font>, it has different type of classes as we saw above: 
 
 | Types                       | Description                       |
 | -----------                 | -----------                       |
