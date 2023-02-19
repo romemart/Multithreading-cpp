@@ -7,7 +7,7 @@ Since threads have similarities to processes, a program of threads is compiled b
 ```cpp
 g++ -std=c++17 main.cpp -lpthread -o main
 ```
-Where main.cpp is the source code file, and the <font color="red">main</font> is the executable file and compiled under standard <span style="color:green;font-size:12px">(C++17)</span>.
+Where <font color="red">main.cpp</font> is the source code file, and the <font color="red">main</font> is the executable file and compiled under standard <span style="color:green;font-size:12px">(C++17)</span>.
 
 A program that uses threads, is begun as follows:
 ```cpp
