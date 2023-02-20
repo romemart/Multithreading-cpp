@@ -451,6 +451,7 @@ std::mutex m1,m2,m3 ...;
 std::lock(m1, m2, m3 ...);
 std::try_lock(m1, m2, m3 ...)
 ```
+Later we will see an example about using std::lock to avoid a deadlock situation. 
 ##### m.lock()
 Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
 If lock is called by a thread that already owns the mutex, the behavior is undefined: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
