@@ -48,15 +48,15 @@ So, to create a thread, a top-level function should already exist. This function
 If a second thread is needed beyond the main thread, a top-level function should be defined. If a third thread is needed, another top-level function should be defined for that, and so on.
 
 ##### Creating a Thread
-The main thread is already there, and it does not have to be recreated. To create another thread, its top-level function should already exist. If the top-level function does not already exist, it should be defined. A thread object is then instantiated, with or without the function. The function is the effective thread (or the effective thread of execution). The following code creates a thread object with a thread (with a function):
+The main thread is already there, and it does not have to be recreated. To create another thread, its top-level function should already exist. If the top-level function does not already exist, it should be defined. A thread object is then instantiated, with or without the function. The function is the effective thread (or the effective thread of execution). The following code creates a thread object with a thrdFn (with a function):
 ```cpp
 #include <iostream>
 #include <thread>
 using namespace std;
 
 void thrdFn() {
-        cout << "seen" << '\n';
-    }  
+    cout << "seen" << '\n';
+}  
 
 int main(int argc, char const *argv[])
 {
@@ -65,7 +65,7 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-The name of the thread is thr, instantiated from the thread class, thread. Remember: to compile and run a thread, use a command similar to the one given above.
+The name of the thread is <font color="red">thr</font>, instantiated from the thread class, thread. Remember: to compile and run a thread, use a command similar to the one given above.
 
 The constructor function of the thread class takes a reference to the function as an argument.
 
@@ -90,7 +90,7 @@ If the above program did not produce any output, the two threads were not forced
 using namespace std;
 
 void thrdFn() {
-        cout << "seen" << '\n';
+    cout << "seen" << '\n';
 }  
 
 int main(int argc, char const *argv[])
@@ -102,7 +102,11 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-Now, there is an output, <font color="red">seen</font> (without any run-time error message). As soon as a thread object is created, with the encapsulation of the function, the thread starts running; i.e., the function starts executing. The join() statement of the new thread object in the main() thread tells the main thread (main() function) to wait until the new thread (function) has completed its execution (running). The main thread will halt and will not execute its statements below the join() statement until the second thread has finished running. The result of the second thread is correct after the second thread has completed its execution.
+Now, there is an output: 
+```cpp
+seen
+```
+without any run-time error message. As soon as a thread object is created, with the encapsulation of the function, the thread starts running; i.e., the function starts executing. The join() statement of the new thread object in the main() thread tells the main thread (main() function) to wait until the new thread (function) has completed its execution (running). The main thread will halt and will not execute its statements below the join() statement until the second thread has finished running. The result of the second thread is correct after the second thread has completed its execution.
 
 If a thread is not joined, it continues to run independently and may even end after the main() thread has ended. In that case, the thread is not really of any use.
 
@@ -113,8 +117,8 @@ The following program illustrates the coding of a thread whose function receives
 using namespace std;
 
 void thrdFn(char str1[], char str2[]) {
-        cout << str1 << str2 << '\n';
-    }  
+    cout << str1 << str2 << '\n';
+}  
 
 int main(int argc, char const *argv[])
 {
@@ -143,8 +147,8 @@ After a thread has been joined, it can be detached. Detaching means separating t
 using namespace std;
 
 void thrdFn(char str1[], char str2[]) {
-        cout << str1 << str2 << '\n';
-    }  
+    cout << str1 << str2 << '\n';
+}  
 
 int main(int argc, char const *argv[])
 {
@@ -168,8 +172,8 @@ id is a class in the thread class. The member function, get_id(), returns an obj
 using namespace std;
 
 void thrdFn(int x) {
-        cout << "Thread:" << x << " ID: " << std::this_thread::get_id() << '\n';
-    }  
+    cout << "Thread:" << x << " ID: " << std::this_thread::get_id() << '\n';
+}  
 
 int main(int argc, char const *argv[])
 {
@@ -191,21 +195,21 @@ The effective thread is a function. A function can return a value. So a thread s
 #include <iostream>
 #include <thread>
 #include <future>
-using namespace std;
-
-future output;
 
 char* thrdFn(char* str) {
-        return str;
-    }  
+    return str;
+}  
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     char st[] = "I have seen it.";
-
-    output = async(thrdFn, st);
+    
+    std::future<char*> output;
+    
+    output = std::async(thrdFn, st);
+    
     char* ret = output.get();   //waits for thrdFn() to provide result
-    cout<<ret<<'\n';
+    
+    std::cout << ret <<'\n';
 
     return 0;
 }
@@ -219,7 +223,7 @@ The calling function (main thread) waits for the executing function in the above
 ```cpp
 char* ret = output.get();
 ```
-This statement uses the get() member function of the future object. The expression `output.get()` halts the execution of the calling function (main() thread) until the supposed thread function completes its execution. If this statement is absent, the main() function may return before async() finishes the execution of the supposed thread function. The get() member function of the future returns the returned value of the supposed thread function. In this way, a thread has indirectly returned a value. There is no join() statement in the program.
+This statement uses the get() member function of the future object. The expression <font color="red">output.get()</font> halts the execution of the calling function (main() thread) until the supposed thread function completes its execution. If this statement is absent, the main() function may return before async() finishes the execution of the supposed thread function. The get() member function of the future returns the returned value of the supposed thread function. In this way, a thread has indirectly returned a value. There is no join() statement in the program.
 <div id='4'/>
 
 #### Communication Between Threads
@@ -420,9 +424,9 @@ std::mutex m;
 The class mutex has the following member functions:
 | Members                       | Description                       |
 | -----------                 | -----------                       |
-|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
 |lock     |Locks the mutex, blocks if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>         |
-|unlock   |Unlock multiple mutexes <span style="color:green;font-size:12px">(public member function)</span>                                       |
+|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
+|unlock   |Unlocks the mutex <span style="color:green;font-size:12px">(public member function)</span>                                       |
 
 Do not confuse public member function of <font color="red">mutex class</font> with functions of the <font color="red">\<mutex></font> library. 
 
@@ -472,7 +476,11 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-The output is 7. There are two threads here: the main() thread and the thread for thrdFn(). Note that the mutex library has been included. The expression to instantiate the mutex is `mutex m;`. Because of the use of lock() and unlock(), the code segment,
+The output is:
+```cpp
+7
+```
+There are two threads here: the main_thread or main() body and the child_thread thr running thrdFn() function. Note that the mutex library has been included. The expression to instantiate the mutex is <font color="red">std::mutex m;</font>. Because of the use of <font color="red">lock()</font> and <font color="red">unlock()</font>, the code segment,
 ```cpp
 globl = globl + 2;
 cout << globl << endl;
@@ -522,11 +530,11 @@ Represented as <font color="red">std::timed_mutex</font> defined as class in hea
 The class timed_mutex has the following member functions:
 | Members                       | Description                       |
 | -----------                 | -----------                       |
-|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
 |lock     |Locks the mutex, blocks if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>         |
+|try_lock |Tries to lock the mutex, returns if the mutex is not available <span style="color:green;font-size:12px">(public member function)</span>|
 |try_lock_for|Tries to lock the mutex, returns if the mutex has been unavailable for the specified relative time duration <span style="color:green;font-size:12px">(public member function)</span>         |
 |try_lock_until|Tries to lock the mutex, returns if the mutex has been unavailable for the specified absolute time point has been reached <span style="color:green;font-size:12px">(public member function)</span>         |
-|unlock   |Unlock multiple mutexes <span style="color:green;font-size:12px">(public member function)</span>    
+|unlock   |Unlocks timed mutex <span style="color:green;font-size:12px">(public member function)</span>    
 
 Member functions in timed_mutex class:
 ```cpp
@@ -755,7 +763,11 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-The output is 7. The type (class) is lock_guard in the mutex library. In constructing its lock object, it takes the template argument, mutex. In the code, the name of the lock_guard instantiated object is lck. It needs an actual mutex object for its construction (m). Notice that there is no statement to unlock the lock in the program. This lock died (unlocked) as it went out of the scope of the thrdFn() function.
+The output is:
+```cpp 
+7
+```
+The type (class) is lock_guard in the mutex library. In constructing its lock object, it takes the template argument, mutex. In the code, the name of the lock_guard instantiated object is lck. It needs an actual mutex object for its construction (m). Notice that there is no statement to unlock the lock in the program. This lock died (unlocked) as it went out of the scope of the thrdFn() function.
 ##### unique_lock
 Represented as <font color="red">std::unique_lock</font> defined as class in header <font color="red">\<mutex></font> (since C++11)
 Only its current thread can be active when any lock is on, in the interval, while the lock is on. The main difference between unique_lock and lock_guard is that ownership of the mutex by a unique_lock, can be transferred to another unique_lock. unique_lock has more member functions than lock_guard.
@@ -954,7 +966,7 @@ Resource 1 owned by Thread 2
 finished process
 ```
 Some strategies to avoid deadlock:
-- Prefer locking single mutex by using separate scopes.
+- Prefer locking single mutex by using separate scopes: { }.
 - Avoid locking a mutex and then calling a user provided function.
 - Use std::lock() to lock more than one mutex.
 - Lock the mutex in the same order.
@@ -975,9 +987,11 @@ auto globl = 10;
 once_flag flag1;
 
 void thrdFn(int no) {
-    call_once(flag1, [no]() {
-        globl =  globl + no;});
-    }
+    call_once(
+                flag1,                          //flag object ensures the call_once runs just once    
+                [no](){ globl = globl + no;}    //Lambda function or callable object
+            );
+}
 
 int main(int argc, char const *argv[])
 {
@@ -993,7 +1007,11 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-The output is 15, confirming that the function, thrdFn(), was called once. That is, the first thread was executed, and the following two threads in main()were not executed. `void call_once()` is a predefined function in the mutex library. It is called the function of interest (thrdFn), which would be the function of the different threads. Its first argument is a flag – see later. In this program, its second argument is a void lambda function. In effect, the lambda function has been called once, not really the thrdFn() function. It is the lambda function in this program that really increments the global variable.
+The output is: 
+```cpp
+15 
+```
+Confirming that the function, thrdFn(), was called once. That is, the first thread was executed, and the following two threads in main()were not executed. `void call_once()` is a predefined function in the mutex library. It is called the function of interest (thrdFn), which would be the function of the different threads. Its first argument is a flag – see later. In this program, its second argument is a void lambda function. In effect, the lambda function has been called once, not really the thrdFn() function. It is the lambda function in this program that really increments the global variable.
 <div id='16'/>
 
 #### Condition Variable Library
