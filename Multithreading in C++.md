@@ -279,13 +279,13 @@ A global variable must not necessarily be passed to a thread as an argument of t
 thread_local int inte = 0;      //keyword introduced since C++11
 
 void thrdFn2() {
-    inte = inte + 2;
+    inte += 2;
     std::cout << inte << " of 2nd thread\n";
 }
 
 void thrdFn1() {
     std::thread thr2(&thrdFn2);
-    inte = inte + 1;
+    inte += 1;
     std::cout << inte << " of 1st thread\n";
 
     thr2.join();
@@ -487,8 +487,8 @@ The output is:
 ```
 There are two threads here: the main_thread or main() body and the child_thread thr running thrdFn() function. Note that the mutex library has been included. The expression to instantiate the mutex is <font color="red">std::mutex m;</font>. Because of the use of <font color="red">lock()</font> and <font color="red">unlock()</font>, the code segment,
 ```cpp
-globl = globl + 2;
-cout << globl << endl;
+globalVar += 2;
+std::cout << globalVar << '\n';
 ```
 Which must not necessarily be indented, is the only code that has access to the memory location (resource), identified by globl, and the computer screen (resource) represented by cout, at the time of execution.
 ##### m.try_lock()
