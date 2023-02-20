@@ -169,23 +169,28 @@ id is a class in the thread class. The member function, get_id(), returns an obj
 #include <iostream>
 #include <thread>
 
-using namespace std;
+void PrintID(const std::string& str) {
+    std::cout << str << " has the ID: " << std::this_thread::get_id() << '\n';
+}
 
-void thrdFn(int x) {
-    cout << "Thread:" << x << " ID: " << std::this_thread::get_id() << '\n';
-}  
+void thrdFn(const std::string& str) {
+    PrintID(str);
+    std::thread t2(PrintID,"t2");
+    t2.join();
+}
 
 int main(int argc, char const *argv[])
 {
-    thread thr1(thrdFn,1);
-    thr1.join();
+    std::thread t1(thrdFn,"t1");
+    t1.join();
 
     return 0;
 }
 ```
 The output is:
 ```cpp
-Thread:1 ID: 40744
+t1 has the ID: 15404
+t2 has the ID: 29128
 ```
 <div id='3'/>
 
@@ -232,26 +237,25 @@ The simplest way for threads to communicate is to be accessing the same global v
 #include <iostream>
 #include <thread>
 #include <string>
-using namespace std;
 
-string global1 = string("I have ");
-string global2 = string("seen it.");
+std::string global1 = "I have ";
+std::string global2 = "seen it.";
 
-void thrdFn2(string str2) {
-        string globl = global1 + str2;
-        cout << globl << endl;
+void thrdFn2(std::string str2) {
+        std::string loc = global1 + str2;
+        std::cout << loc << std::endl;
     }
 
-void thrdFn1(string str1) {
+void thrdFn1(std::string str1) {
         global1 = "Yes, " + str1;
 
-        thread thr2(&thrdFn2, global2);  
+        std::thread thr2(&thrdFn2, global2);  
         thr2.join();
     }  
 
 int main(int argc, char const *argv[])
 {
-    thread thr1(&thrdFn1, global1);  
+    std::thread thr1(&thrdFn1, global1);  
     thr1.join();
 
     return 0;
@@ -271,27 +275,26 @@ A global variable must not necessarily be passed to a thread as an argument of t
 ```cpp
 #include <iostream>
 #include <thread>
-using namespace std;
 
-thread_local int inte = 0;
+thread_local int inte = 0;      //keyword introduced since C++11
 
 void thrdFn2() {
     inte = inte + 2;
-    cout << inte << " of 2nd thread\n";
+    std::cout << inte << " of 2nd thread\n";
 }
 
 void thrdFn1() {
-    thread thr2(&thrdFn2);
+    std::thread thr2(&thrdFn2);
     inte = inte + 1;
-    cout << inte << " of 1st thread\n";
+    std::cout << inte << " of 1st thread\n";
 
     thr2.join();
 }  
 
 int main(int argc, char const *argv[])
 {
-    thread thr1(&thrdFn1);  
-    cout << inte << " of 0th thread\n";
+    std::thread thr1(&thrdFn1);  
+    std::cout << inte << " of 0th thread\n";
     thr1.join();
 
     return 0;
@@ -380,7 +383,7 @@ Call once.
 |Functions   | Description                     |
 | --------   |  --------                       |
 |once_flag <span style="color:green;font-size:12px">(C++11)</span>|Helper object to ensure that call_once invokes the function only once <span style="color:green;font-size:12px">(class)</span>|
-|lock <span style="color:green;font-size:12px">(C++11)</span>|Invokes a function only once even if called from multiple threads <span style="color:green;font-size:12px">(function template)</span>|
+|call_once <span style="color:green;font-size:12px">(C++11)</span>|Invokes a function only once even if called from multiple threads <span style="color:green;font-size:12px">(function template)</span>|
 
 <div id='10'/>
 
@@ -409,6 +412,8 @@ Here, tp is an instantiated object.
 <div id='11'/>
 
 #### Lockable Requirements
+
+the most popular are:
 
 | Types                       | Description                       |
 | -----------                 | -----------                       |
@@ -457,14 +462,14 @@ Unlocks the mutex (done from tha above lock() explanation), releasing ownership 
 #include <thread>       //std::thread
 #include <mutex>        //std::mutex  lock()  unlock()
 
-int globl = 5;
+int globalVar = 5;
 std::mutex m;
 
 void thrdFn() {
     //some statements
     m.lock();
-        globl = globl + 2;
-        std::cout << globl << std::endl;
+        globalVar += 2;
+        std::cout << globalVar << '\n';
     m.unlock();
 }
 
@@ -742,22 +747,21 @@ When a lock_guard object is created, it attempts to take ownership of the mutex 
 #include <iostream>
 #include <thread>
 #include <mutex>
-using namespace std;
 
-int globl = 5;
-mutex m;
+int globalVar = 5;
+std::mutex m;
 
 void thrdFn() {
     //some statements
-    lock_guard<mutex> lck(m);
-        globl = globl + 2;
-        cout << globl << endl;
+    std::lock_guard<std::mutex> lck(m);
+    globalVar += 2;
+    std::cout << globalVar << '\n';
     //statements
 }
 
 int main(int argc, char const *argv[])
 {
-    thread thr(&thrdFn);
+    std::thread thr(&thrdFn);
     thr.join();
 
     return 0;
@@ -785,31 +789,30 @@ Ownership of a mutex can be transferred from unique_lock1 to unique_lock2 by fir
 #include <iostream>
 #include <thread>
 #include <mutex>
-using namespace std;
 
-mutex m;
+std::mutex m;
 
-int globl = 5;
+int globalVar = 5;
 
 void thrdFn2() {
-    unique_lock<mutex> lck2(m);
-        globl = globl + 2;
-        cout << globl << endl;
-    }
+    std::unique_lock<std::mutex> lck2(m);
+    globalVar += 2;
+    std::cout << globalVar << '\n';
+}
 
 void thrdFn1() {
-    unique_lock<mutex> lck1(m);
-        globl = globl + 2;
-        cout << globl << endl;
+    std::unique_lock<std::mutex> lck1(m);
+    globalVar += 2;
+    std::cout << globalVar << '\n';
 
-        lck1.unlock();
-        thread thr2(&thrdFn2);
-        thr2.join();  
-    }  
+    lck1.unlock();
+    std::thread thr2(&thrdFn2);
+    thr2.join();  
+}  
 
 int main(int argc, char const *argv[])
 {
-    thread thr1(&thrdFn1);  
+    std::thread thr1(&thrdFn1);  
     thr1.join();
 
     return 0;
@@ -980,29 +983,29 @@ Imagine that there is a function that has to increment a global variable of 10 b
 #include <iostream>
 #include <thread>
 #include <mutex>
-using namespace std;
 
-auto globl = 10;
+int globalVar = 10;
 
-once_flag flag1;
+std::once_flag flag1;
 
 void thrdFn(int no) {
     call_once(
-                flag1,                          //flag object ensures the call_once runs just once    
-                [no](){ globl = globl + no;}    //Lambda function or callable object
+                flag1,                       //flag object ensures the call_once runs just once    
+                [no](){ globalVar += no;}    //Lambda function or callable object
             );
 }
 
 int main(int argc, char const *argv[])
 {
-    thread thr1(&thrdFn, 5);  
-    thread thr2(&thrdFn, 5);  
-    thread thr3(&thrdFn, 5);  
+    std::thread thr1(&thrdFn, 5);  
+    std::thread thr2(&thrdFn, 5);  
+    std::thread thr3(&thrdFn, 5);  
+    
     thr1.join();
     thr2.join();
     thr3.join();
 
-    cout << globl << endl;
+    std::cout << globalVar << std::endl;
 
     return 0;
 }
@@ -1127,7 +1130,7 @@ int main(int argc, char const *argv[]){
     std::thread t1(fn,std::ref(fut));
 
     //sets the promise object and then gets in the future object.
-    pro.set_value("setting value from main thread");
+    pro.set_value("Sets value from main thread");
 
     t1.join();
 
@@ -1136,7 +1139,7 @@ int main(int argc, char const *argv[]){
 ```
 The output is:
 ```cpp
-setting value from main thread and printing through child thread function.
+Sets value from main thread and printing through child thread function.
 ```
 
 An example about the second one use:
@@ -1146,7 +1149,7 @@ An example about the second one use:
 #include <future>   // std::future  std::promise
 
 void fn(std::promise<std::string> pro, int inpt) {
-    pro.set_value("returning value from thread function.");
+    pro.set_value("Returns value from thread function.");
 }
 
 int main(int argc, char const* argv[]) {
@@ -1170,7 +1173,7 @@ int main(int argc, char const* argv[]) {
 ```
 The output is:
 ```cpp
-returning value from thread function.
+Returns value from thread function.
 ```
 Another same example:
 ```cpp
